@@ -1,0 +1,31 @@
+#!/usr/bin/env ruby
+require_relative '../lib/unicorn-reloader'
+require 'optparse'
+
+options = {}
+OptionParser.new do |opts|
+  opts.on('-p n', '--polling n',
+      'Use file system polling instead of notifications. Defaults to false.') do |poll|
+    options[:poll] = poll.downcase == 'true' ? true : false
+  end
+
+  opts.on('-g n', '--graceful n', 'Gracefully restart Unicorn workers. Defaults to false.') do |graceful|
+    options[:graceful] = graceful.downcase == 'true' ? true : false
+  end
+
+  opts.on('-f', '--watch-folders x,y,z', Array, 'Comma separated list of folders to watch. ') do |folders|
+    options[:folders] = folders
+  end
+
+  opts.on('-e [REGEXP]', '--extensions [REGEXP]', Regexp,
+      'Regex pattern of file extensions to watch.') do |extensions|
+    options[:extensions] = extensions
+  end
+
+  opts.on('-h', '--help', 'Show this message') do
+    puts opts
+    exit
+  end
+end.parse!
+
+Unicorn::Reloader::Runner.new(options, ARGV)
